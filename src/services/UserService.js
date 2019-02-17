@@ -2,7 +2,8 @@ import { userModel } from '../models'
 
 class UserService {
     async registerUser(userData) {
-        const conflictUser = await userModel.findOne({ email: userData.email, name: userData.name });
+
+        const conflictUser = await userModel.findOne({ email: userData.email });
 
         if (conflictUser) {
             return [409, conflictUser];
@@ -10,13 +11,13 @@ class UserService {
         
         const user = await userModel.create(userData);
         
-        console.log(`user: ${user}`);
-    
+        console.log(`users: ${user}`);
+
         return [201, user];
     }
     
     async loginUser(userData) {
-        const user = await userModel.findOne({ userData });
+        const user = await userModel.findOne({ email: userData.email, password: userData.password });
 
         if (user) {
             return [200, user];
@@ -25,8 +26,8 @@ class UserService {
         return [404, { message: 'User doesn`t exist' }];
     }
     
-    async getUser(userData) {
-        const user = await userModel.findOne({ email: userData.email, name: userData.name });
+    async getUser() {
+        const user = await userModel.find();
 
         if (user) {
             return [200, user];

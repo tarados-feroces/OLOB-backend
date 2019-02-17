@@ -7,13 +7,20 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack-dev": "./node_modules/.bin/webpack -w --config webpack.config.dev.js",
     "webpack": "./node_modules/.bin/webpack --config webpack.config.js",
-    "start": "node ./dist/bundle.js"
+    "start": "node ./dist/bundle.js",
+    "server_install": "docker build -t tft_back:tft_back -f Dockerfile ./",
+    "server_run": "docker run -p 5000:5000 --rm -it --name tft_back tft_back:tft_back",
+    "server": "npm run server_install && npm run server_run",
+    "local_start": "./helpers/install.sh && npm run webpack && ./helpers/local_start.sh"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "connect-mongo": "^2.0.3",
+    "cookie-parser": "^1.4.4",
     "express": "^4.16.4",
+    "express-session": "^1.15.6",
     "mongodb": "^3.1.8",
     "mongoose": "^5.3.6"
   },

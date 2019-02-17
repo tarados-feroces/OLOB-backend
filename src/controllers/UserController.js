@@ -19,7 +19,7 @@ class UserController {
     }
 
     async getUser(req, res) {
-        const [status, user] = await userService.getUser(req.body);
+        const [status, user] = await userService.getUser();
 
         res.status(status);
         res.send(user);

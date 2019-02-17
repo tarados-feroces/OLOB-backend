@@ -35,7 +35,7 @@ RUN ./helpers/install.sh
 # RUN cat ./supervisor.conf > /etc/supervisor/conf.d/mongo.conf
 # RUN service supervisor start && supervisorctl reload && supervisorctl update
 RUN npm run webpack
-RUN chmod +x ./helpers/start.sh
+RUN chmod +x
 # RUN /usr/bin/mongod
 
 # Run server
