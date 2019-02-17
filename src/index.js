@@ -1,6 +1,6 @@
-import userController from './controllers/UserController';
-const process = require('process');
+import router from './routes/routes';
 
+const process = require('process');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -10,7 +10,6 @@ const mongoStore = require('connect-mongo')(session); // Хранилище се
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(require('cookie-parser')());
-
 app.use(session({
     secret: 'i need more beers',
     resave: false,
@@ -20,9 +19,6 @@ app.use(session({
     })
 }));
 
-app.post('/user/signup', userController.registerUser);
-app.post('/user/login', userController.loginUser);
-app.get('/me', userController.getUser);
-app.post('/user/signout', userController.signoutUser);
+app.use('/', router);
 
 app.listen(process.env.PORT || 5000, () => console.log('Example app listening on port 5000!'));

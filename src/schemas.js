@@ -23,5 +23,6 @@ export const userSchema = new mongoose.Schema({
         required: [true, 'passwordRequired'],
         maxlength: [32, 'tooLong'],
         minlength: [2, 'tooShort']
-    }
+    },
+    avatar: String
 });

@@ -2,10 +2,15 @@ import { userModel } from '../models';
 
 class UserService {
     async registerUser(userData) {
-        const conflictUser = await userModel.findOne({ login: userData.login });
+        const conflictLogin = await userModel.findOne({ login: userData.login });
+        const conflictEmail = await userModel.findOne({ email: userData.email });
 
-        if (conflictUser) {
-            return [409, conflictUser];
+        if (conflictLogin && conflictEmail) {
+            return [409, conflictLogin];
+        }
+
+        if (conflictLogin && !conflictEmail) {
+            return [400, conflictLogin];
         }
 
         const user = await userModel.create(userData);

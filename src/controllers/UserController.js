@@ -4,7 +4,7 @@ class UserController {
     async registerUser(req, res) {
         const [status, user] = await userService.registerUser(req.body);
         if (user) {
-            req.session.user = { id: user._id, email: user.email };
+            req.session.user = { id: user._id, login: user.login };
         }
         res.status(status);
         res.send(user);
@@ -14,7 +14,7 @@ class UserController {
     async loginUser(req, res) {
         const [status, user] = await userService.loginUser(req.body);
         if (user) {
-            req.session.user = { id: user._id, email: user.email };
+            req.session.user = { id: user._id, login: user.login };
         }
         res.status(status);
         res.send(user);
