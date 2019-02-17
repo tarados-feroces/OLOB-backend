@@ -1,8 +1,9 @@
 import userController from './controllers/UserController';
+const process = require('process');
 
 const express = require('express');
 const app = express();
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 const session = require('express-session'); // Сессии
 const mongoStore = require('connect-mongo')(session); // Хранилище сессий в монгодб
 
