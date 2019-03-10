@@ -1,4 +1,3 @@
 #!/bin/bash
 
-mongod
-npm start
+mongod & npm start
