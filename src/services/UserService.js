@@ -30,7 +30,7 @@ class UserService {
     }
 
     async getUser(id) {
-        const user = await userModel.findOne(id);
+        const user = await userModel.findOne({ _id: id });
 
         if (user) {
             return [200, user];

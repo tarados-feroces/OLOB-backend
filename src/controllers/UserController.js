@@ -16,14 +16,16 @@ class UserController {
         if (user) {
             req.session.user = { id: user._id, login: user.login };
         }
+
         res.status(status);
         res.send(user);
         res.end();
     }
 
     async getUser(req, res) {
+        console.log(req.session.user);
         if (req.session.user) {
-            const [status, user] = await userService.getUser();
+            const [status, user] = await userService.getUser(req.session.user.id);
             res.status(status);
             res.send(user);
             res.end();
