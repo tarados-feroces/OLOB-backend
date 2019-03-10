@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session'); // Сессии
 const mongoStore = require('connect-mongo')(session); // Хранилище сессий в монгодб
 const cors = require('cors');
+import wsServer from './controllers/WebSocketController';
 
 const whitelist = ['http://localhost:8080'];
 const corsOptions = {
@@ -35,15 +36,6 @@ app.use(session({
 
 app.use('/', router);
 
-// const WebSocketServer = require('ws');
-//
-// // подключенные клиенты
-// const clients = {};
-//
-// // WebSocket-сервер на порту 5001
-// const webSocketServer = new WebSocketServer.Server({
-//     port: 5001
-// });
-// webSocketServer.on('connection', );
+wsServer.start();
 
 app.listen(process.env.PORT || 5000, () => console.log('Example app listening on port 5000!'));

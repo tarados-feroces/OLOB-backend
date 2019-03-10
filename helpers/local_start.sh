@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mongod & npm start
+mongod & npm run webpack-dev & npm start
