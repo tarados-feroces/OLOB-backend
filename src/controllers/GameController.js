@@ -11,7 +11,7 @@ class GameController {
 
         this.messageTypes = {
             init: this.startGame,
-            GAME_INITED: this.handleGame
+            game: this.handleGame
         };
     }
 
