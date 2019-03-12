@@ -11,7 +11,7 @@ class GameController {
 
         this.messageTypes = {
             init: this.startGame,
-            game: this.handleGame
+            GAME_INITED: this.handleGame
         };
     }
 
@@ -26,16 +26,19 @@ class GameController {
             });
             this.clients[req.session.user.login].send(answer);
             this.clients[nextPlayer].send(answer);
-            this.parties[10] = {
+            this.parties['lol'] = {
                 first: nextPlayer,
                 second: req.session.user.login
             };
         }
     }
 
-    handleGame(message, req) {
-        this.clients[this.parties[message.gameID].first].send(JSON.stringify(message));
-        this.clients[this.parties[message.gameID].second].send(JSON.stringify(message));
+    handleGame(data, req) {
+        console.log(data);
+        console.log(this.parties[data.message.gameID]);
+
+        this.clients[this.parties[data.message.gameID].first].send(JSON.stringify(data));
+        this.clients[this.parties[data.message.gameID].second].send(JSON.stringify(data));
     }
 }
 
