@@ -24,6 +24,7 @@ class UserController {
 
     async getUser(req, res) {
         console.log(req.session.user);
+        await userService.getAllUsers();
         if (req.session.user) {
             const [status, user] = await userService.getUser(req.session.user.id);
             res.status(status);

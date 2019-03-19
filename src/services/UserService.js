@@ -1,20 +1,30 @@
 import { userModel } from '../models';
 
 class UserService {
+    constructor() {
+        this.clients = {};
+    }
+
+    addClient(id, ws) {
+        this.clients[id] = ws;
+    }
+
+    removeClient(id) {
+        delete this.clients[id];
+    }
+
+    sendMessage(id, message) {
+        this.clients[id].send(JSON.stringify(message));
+    }
+
     async registerUser(userData) {
-        const conflictLogin = await userModel.findOne({ login: userData.login });
-        const conflictEmail = await userModel.findOne({ email: userData.email });
+        const conflictUser = await userModel.findOne({ $or: [{ login: userData.login }, { email: userData.email }] });
 
-        if (conflictLogin && conflictEmail) {
-            return [409, conflictLogin];
-        }
-
-        if (conflictLogin && !conflictEmail) {
-            return [400, conflictLogin];
+        if (conflictUser) {
+            return [409, conflictUser];
         }
 
         const user = await userModel.create(userData);
-        console.log(`users: ${user}`);
 
         return [201, user];
     }
@@ -30,7 +40,7 @@ class UserService {
     }
 
     async getUser(id) {
-        const user = await userModel.findOne({ _id: id });
+        const user = await userModel.findById(id);
 
         if (user) {
             return [200, user];
@@ -39,6 +49,11 @@ class UserService {
         return [404, { message: 'User doesn`t exist' }];
     }
 
+    async getAllUsers() {
+        const users = await userModel.find({});
+        console.log(users);
+    }
+    //
     // checkUser(userData) {
     //     return User
     //         .findOne({ login: userData.login })

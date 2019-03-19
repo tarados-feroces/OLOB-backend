@@ -6,7 +6,7 @@ export const userSchema = new mongoose.Schema({
         required: [true, 'loginRequired'],
         maxlength: [32, 'tooLong'],
         minlength: [2, 'tooShort'],
-        // match:[/^[.]+$/,"email"], //сделать норм регулярку на email
+        // match:[/^[.]+$/,"email"], //сделать норм регулярку на login
         unique: true
     },
     email: {

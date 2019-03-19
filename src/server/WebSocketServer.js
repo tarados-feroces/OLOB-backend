@@ -1,7 +1,8 @@
 'use strict';
-import gameController from './GameController';
+import gameController from '../controllers/GameController';
+import userService from '../services/UserService';
 
-class WebSocketController {
+class WebSocketServer {
     constructor() {
         this.start = this.start.bind(this);
     }
@@ -19,22 +20,22 @@ class WebSocketController {
         });
 
         webSocketServer.on('connection', (ws, req) => {
-            gameController.clients[req.session.user.login] = ws;
+            userService.addClient(req.session.user.id, ws);
             console.log(`new connection: ${req.session.user.login}`);
 
             ws.on('message', (message) => {
                 console.log(`message received ${message}`);
                 const data = JSON.parse(message);
-                gameController.messageTypes[data.cls](data, req);
+                gameController.messageHandlers[data.cls](data.data, req);
             });
 
             ws.on('close', () => {
                 console.log(`connection closed ${req.session.user.login}`);
-                delete gameController.clients[req.session.user.login];
+                delete userService.removeClient(req.session.user.id);
             });
         });
     }
 }
 
-const webSocketController = new WebSocketController();
+const webSocketController = new WebSocketServer();
 export default webSocketController;
