@@ -1,7 +1,7 @@
 'use strict';
 import { BoardLetters, GameStatus } from '../constants/GameConstants';
 
-const Chess = require('chess.js').Chess;
+const Chess = require('chess.js');
 
 class GameService {
     init(player1, player2) {
@@ -26,10 +26,10 @@ class GameService {
         }
 
         if (this.chess.game_over()) {
-            status = GameStatus.ENDED;
+            status = GameStatus.MATE;
         }
 
-        return { game: this.chess.fen(), status };
+        return { game: this.chess.fen(), status, currentUser: this.chess.turn() };
     }
 
     getAvailableMoves(game, pos) {

@@ -9,7 +9,6 @@ const mongoStore = require('connect-mongo')(session); // Хранилище се
 const cors = require('cors');
 const http = require('http');
 import wsServer from './server/WebSocketServer';
-// import userService from './services/UserService';
 
 const whitelist = ['http://localhost:8080'];
 const corsOptions = {

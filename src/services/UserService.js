@@ -6,6 +6,7 @@ class UserService {
     }
 
     addClient(id, ws) {
+        console.log('add: ', id);
         this.clients[id] = ws;
     }
 
@@ -14,6 +15,8 @@ class UserService {
     }
 
     sendMessage(id, message) {
+        console.log('send: ', id);
+        console.log(Object.keys(this.clients));
         this.clients[id].send(JSON.stringify(message));
     }
 
@@ -51,7 +54,7 @@ class UserService {
 
     async getAllUsers() {
         const users = await userModel.find({});
-        console.log(users);
+        return users;
     }
     //
     // checkUser(userData) {

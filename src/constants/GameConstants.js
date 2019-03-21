@@ -20,9 +20,8 @@ export const BoardLetters = {
 };
 
 export const GameStatus = {
-    ENDED: -1,
-    NORMAL: 0,
-    CHECK: 1
+    MATE: 'MATE',
+    CHECK: 'CHECK'
 };
 
 export const Side = {

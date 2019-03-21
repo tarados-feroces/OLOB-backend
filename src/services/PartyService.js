@@ -8,7 +8,7 @@ class PartyService {
     }
 
     add(playerID1, playerID2, game) {
-        const partyID = this._countPartyID();
+        const partyID = this._countPartyID(playerID1, playerID2);
         console.log(partyID);
 
         this.parties[partyID] = {
@@ -36,7 +36,7 @@ class PartyService {
     }
 
     getCurrentParty(req) {
-        return this.userToParty[req.session.user.id];
+        return this.parties[this.userToParty[req.session.user.id]];
     }
 
     updatePartyGame(req, game) {

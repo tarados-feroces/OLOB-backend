@@ -1,6 +1,6 @@
 'use strict';
 import partyService from '../services/PartyService';
-import { gameMessageTypes } from '../constants/GameConstants';
+import { gameMessageTypes, GameStatus } from '../constants/GameConstants';
 import userService from '../services/UserService';
 import gameService from '../services/GameService';
 
@@ -19,11 +19,13 @@ class GameController {
     searchGame = (message, req) => {
         const nextPlayer = this.gameQueue.shift();
         if (!nextPlayer) {
-            this.gameQueue.push(req.session.user.login);
+            this.gameQueue.push(req.session.user.id);
         } else {
             const gameCreated = {
                 data: {
-                    enemy: { ...userService.getUser(nextPlayer), _id: nextPlayer }
+                    state: {
+                        opponent: { login: userService.getUser(nextPlayer).login, id: nextPlayer }
+                    }
                 },
                 cls: gameMessageTypes.STARTED
             };
@@ -33,15 +35,32 @@ class GameController {
             userService.sendMessage(req.session.user.id, gameCreated);
             userService.sendMessage(nextPlayer, gameCreated);
 
-            this.sendSnapshot();
+            this.sendSnapshot(null, req);
         }
     };
 
     sendSnapshot = (data, req) => {
-        const game = partyService.getCurrentParty(req).game;
+        const party = partyService.getCurrentParty(req);
+
+        data.situation.type === GameStatus.MATE && this.gameEnded(data.currentUser === 'w' ? party.playerID2 : party.playerID1);
+
         this._sendData({
             data: {
-                state: game
+                fen: data.fen,
+                situation: {
+                    type: data.situation
+                },
+                currentUser: data.currentUser === 'w' ? party.playerID1 : party.playerID2
+            },
+            cls: gameMessageTypes.SNAPSHOT }, req);
+    };
+
+    gameEnded = (winnerID, req) => {
+        this._sendData({
+            data: {
+                state: {
+                    winner: winnerID
+                }
             },
             cls: gameMessageTypes.SNAPSHOT }, req);
     };
@@ -54,13 +73,7 @@ class GameController {
 
         partyService.updatePartyGame(req, result.game);
 
-        this._sendData({
-            data: {
-                ...data,
-                status: result.status
-            },
-            cls: gameMessageTypes.UPDATE
-        }, req);
+        this.sendSnapshot(result, req);
     };
 
     getAvailableMoves = (data, req) => {
@@ -72,14 +85,14 @@ class GameController {
             data: {
                 steps: steps
             },
-            cls: gameMessageTypes.AREAS
+            cls: gameMessageTypes.UPDATE
         }, req);
     };
 
     _sendData = (message, req) => {
-        const players = partyService.parties[partyService.getCurrentParty(req)];
-        userService.sendMessage(players.playerID1, message);
-        userService.sendMessage(players.playerID2, message);
+        const { playerID1, playerID2 } = partyService.getCurrentParty(req);
+        userService.sendMessage(playerID1, message);
+        userService.sendMessage(playerID2, message);
     };
 }
 
