@@ -14,9 +14,13 @@ class GameService {
 
     makeStep(game, step) {
         this.chess.load(game);
+        console.log({
+            from: this._transpileCoordsToStep(step.prevPos),
+            to: this._transpileCoordsToStep(step.nextPos)
+        });
         this.chess.move({
             from: this._transpileCoordsToStep(step.prevPos),
-            to: this._transpileCoordsToStep(step.newPos)
+            to: this._transpileCoordsToStep(step.nextPos)
         });
 
         let status = GameStatus.NORMAL;
@@ -29,7 +33,9 @@ class GameService {
             status = GameStatus.MATE;
         }
 
-        return { game: this.chess.fen(), status, currentUser: this.chess.turn() };
+        console.log(this.chess.fen());
+
+        return { fen: this.chess.fen(), status, currentUser: this.chess.turn() };
     }
 
     getAvailableMoves(game, pos) {
@@ -39,7 +45,7 @@ class GameService {
     }
 
     _transpileCoordsToStep(coords) {
-        return `${BoardLetters[coords.y]}${coords.x}`;
+        return `${BoardLetters[coords.x]}${coords.y + 1}`;
     }
 
     _transpileStepToCoords(step) {

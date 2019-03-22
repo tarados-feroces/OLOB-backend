@@ -21,36 +21,38 @@ class GameController {
         if (!nextPlayer) {
             this.gameQueue.push(req.session.user.id);
         } else {
+            const newGame = gameService.init(req.session.user.id, userService.clients[nextPlayer]);
+            partyService.add(req.session.user.id, nextPlayer, newGame);
+
             const gameCreated = {
                 data: {
-                    state: {
-                        opponent: { login: userService.getUser(nextPlayer).login, id: nextPlayer }
-                    }
+                    opponent: { login: userService.getUser(nextPlayer).login, id: nextPlayer },
+                    fen: newGame,
+                    situation: {},
+                    currentUser: req.session.user.id
                 },
                 cls: gameMessageTypes.STARTED
             };
 
-            const newGame = gameService.init(req.session.user.login, userService.clients[nextPlayer]);
-            partyService.add(req.session.user.id, nextPlayer, newGame);
             userService.sendMessage(req.session.user.id, gameCreated);
             userService.sendMessage(nextPlayer, gameCreated);
-
-            this.sendSnapshot(null, req);
         }
     };
 
     sendSnapshot = (data, req) => {
         const party = partyService.getCurrentParty(req);
 
-        data.situation.type === GameStatus.MATE && this.gameEnded(data.currentUser === 'w' ? party.playerID2 : party.playerID1);
+        data.situation &&
+            data.situation.type === GameStatus.MATE &&
+            this.gameEnded(data.currentUser === 'w' ? party.playerID2 : party.playerID1);
 
         this._sendData({
             data: {
                 fen: data.fen,
                 situation: {
-                    type: data.situation
+                    type: data.situation ? data.situation : ''
                 },
-                currentUser: data.currentUser === 'w' ? party.playerID1 : party.playerID2
+                currentUser: data.currentUser && data.currentUser === 'b' ? party.playerID2 : party.playerID1
             },
             cls: gameMessageTypes.SNAPSHOT }, req);
     };
@@ -58,9 +60,7 @@ class GameController {
     gameEnded = (winnerID, req) => {
         this._sendData({
             data: {
-                state: {
-                    winner: winnerID
-                }
+                winner: winnerID
             },
             cls: gameMessageTypes.SNAPSHOT }, req);
     };
@@ -71,7 +71,7 @@ class GameController {
 
         const result = gameService.makeStep(game, data.step);
 
-        partyService.updatePartyGame(req, result.game);
+        partyService.updatePartyGame(req, result.fen);
 
         this.sendSnapshot(result, req);
     };

@@ -40,7 +40,7 @@ class PartyService {
     }
 
     updatePartyGame(req, game) {
-        this.userToParty[req.session.user.id].game = game;
+        this.parties[this.userToParty[req.session.user.id]].game = game;
     }
 
     getEnemyOfUser(req) {
