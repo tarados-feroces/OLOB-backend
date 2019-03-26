@@ -1,5 +1,5 @@
 'use strict';
-import { BoardLetters, GameStatus } from '../constants/GameConstants';
+import { GameStatus } from '../constants/GameConstants';
 
 const Chess = require('chess.js');
 
@@ -33,25 +33,24 @@ class GameService {
             status = GameStatus.MATE;
         }
 
-        console.log(this.chess.fen());
-
         return { fen: this.chess.fen(), status, currentUser: this.chess.turn() };
     }
 
     getAvailableMoves(game, pos) {
         this.chess.load(game);
         const steps = this.chess.moves({ square: this._transpileCoordsToStep(pos) });
+        console.log(steps);
         return steps.map((item) => this._transpileStepToCoords(item));
     }
 
     _transpileCoordsToStep(coords) {
-        return `${BoardLetters[coords.x]}${coords.y + 1}`;
+        return `${String.fromCharCode(coords.x + 97)}${coords.y + 1}`;
     }
 
     _transpileStepToCoords(step) {
         return {
-            x: step[1],
-            y: step[0]
+            x: step[0].charCodeAt(0) - 97,
+            y: Number(step[1]) - 1
         };
     }
 }

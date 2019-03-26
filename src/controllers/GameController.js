@@ -79,14 +79,16 @@ class GameController {
     getAvailableMoves = (data, req) => {
         const party = partyService.getCurrentParty(req);
         const game = party.game;
-        const steps = gameService.getAvailableMoves(game, data.pos);
+        const steps = gameService.getAvailableMoves(game, data.position);
 
-        this._sendData({
+        console.log('STEPS: ', steps);
+
+        userService.sendMessage(req.session.user.id, {
             data: {
                 steps: steps
             },
             cls: gameMessageTypes.UPDATE
-        }, req);
+        });
     };
 
     _sendData = (message, req) => {
