@@ -38,7 +38,7 @@ class GameService {
 
     getAvailableMoves(game, pos) {
         this.chess.load(game);
-        const steps = this.chess.moves({ square: this._transpileCoordsToStep(pos) });
+        const steps = this.chess.moves({ square: this._transpileCoordsToStep(pos), verbose: true });
         console.log(steps);
         return steps.map((item) => this._transpileStepToCoords(item));
     }
@@ -47,10 +47,11 @@ class GameService {
         return `${String.fromCharCode(coords.x + 97)}${coords.y + 1}`;
     }
 
-    _transpileStepToCoords(step) {
+    _transpileStepToCoords(item) {
         return {
-            x: step[0].charCodeAt(0) - 97,
-            y: Number(step[1]) - 1
+            x: item.to[0].charCodeAt(0) - 97,
+            y: Number(item.to[1]) - 1,
+            captured: Boolean(item.captured)
         };
     }
 }
