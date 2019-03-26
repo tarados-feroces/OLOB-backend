@@ -8,7 +8,7 @@ const session = require('express-session'); // Сессии
 const mongoStore = require('connect-mongo')(session); // Хранилище сессий в монгодб
 const cors = require('cors');
 const http = require('http');
-import wsServer from './controllers/WebSocketController';
+import wsServer from './server/WebSocketServer';
 
 const whitelist = ['http://localhost:8080'];
 const corsOptions = {

@@ -1,4 +1,5 @@
 module.exports = {
+    parser: 'babel-eslint',
     plugins: [
         'no-unsafe-regex' // защита от экспоненциального потребления вычислительных ресурсов
     ],
