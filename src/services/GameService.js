@@ -23,7 +23,7 @@ class GameService {
             to: this._transpileCoordsToStep(step.nextPos)
         });
 
-        let status = GameStatus.NORMAL;
+        let status = false;
 
         if (this.chess.in_check()) {
             status = GameStatus.CHECK;
@@ -33,7 +33,27 @@ class GameService {
             status = GameStatus.MATE;
         }
 
-        return { fen: this.chess.fen(), status, currentUser: this.chess.turn() };
+        const situation = {
+            type: status
+        };
+
+        // if (status) {
+        //     const board = this.chess.board();
+        //     for (let line = 0; line < board.length; ++line) {
+        //         for (let pos = 0; pos < line.length; ++pos) {
+        //             if (board[line][pos].type === 'k' && board[line][pos] === this.chess.turn()) {
+        //                 situation.x = pos;
+        //                 situation.y = line;
+        //             }
+        //         }
+        //     }
+        // }
+
+        return {
+            fen: this.chess.fen(),
+            situation,
+            currentUser: this.chess.turn()
+        };
     }
 
     getAvailableMoves(game, pos) {

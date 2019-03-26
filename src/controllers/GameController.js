@@ -21,22 +21,38 @@ class GameController {
         if (!nextPlayer) {
             this.gameQueue.push(req.session.user.id);
         } else {
-            const newGame = gameService.init(req.session.user.id, userService.clients[nextPlayer]);
-            partyService.add(req.session.user.id, nextPlayer, newGame);
+            this.startGame(req.session.user.id, nextPlayer);
+        }
+    };
 
-            const gameCreated = {
+    startGame = (userID1, userID2) => {
+        const newGame = gameService.init(userID1, userID2);
+            partyService.add(userID1, userID2, newGame);
+
+            const gameCreatedWhite = {
                 data: {
-                    opponent: { login: userService.getUser(nextPlayer).login, id: nextPlayer },
+                    opponent: { login: userService.getUser(userID2).login, id: userID2 },
                     fen: newGame,
                     situation: {},
-                    currentUser: req.session.user.id
+                    currentUser: userID1,
+                    side: 0
                 },
                 cls: gameMessageTypes.STARTED
             };
 
-            userService.sendMessage(req.session.user.id, gameCreated);
-            userService.sendMessage(nextPlayer, gameCreated);
-        }
+            const gameCreatedBlack = {
+                data: {
+                    opponent: { login: userService.getUser(userID1).login, id: userID1 },
+                    fen: newGame,
+                    situation: {},
+                    currentUser: userID2,
+                    side: 1
+                },
+                cls: gameMessageTypes.STARTED
+            };
+
+            userService.sendMessage(userID1, gameCreatedWhite);
+            userService.sendMessage(userID2, gameCreatedBlack);
     };
 
     sendSnapshot = (data, req) => {
@@ -44,7 +60,7 @@ class GameController {
 
         data.situation &&
             data.situation.type === GameStatus.MATE &&
-            this.gameEnded(data.currentUser === 'w' ? party.playerID2 : party.playerID1);
+            this.gameEnded(data.currentUser === 'w' ? party.playerID2 : party.playerID1, req);
 
         this._sendData({
             data: {
@@ -58,11 +74,12 @@ class GameController {
     };
 
     gameEnded = (winnerID, req) => {
+        console.log('#########################################################');
         this._sendData({
             data: {
                 winner: winnerID
             },
-            cls: gameMessageTypes.SNAPSHOT }, req);
+            cls: gameMessageTypes.FINISHED }, req);
     };
 
     makeStep = (data, req) => {
@@ -70,6 +87,8 @@ class GameController {
         const game = party.game;
 
         const result = gameService.makeStep(game, data.step);
+
+        console.log('STATUS: ', result.situation);
 
         partyService.updatePartyGame(req, result.fen);
 
