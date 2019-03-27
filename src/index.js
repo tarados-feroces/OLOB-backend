@@ -27,13 +27,14 @@ app.use(bodyParser.json());
 app.use(require('cookie-parser')());
 const sessionParser = session({
     secret: 'i need more beers',
-    saveUninitialized: false,
     resave: false,
+    saveUninitialized: false,
     store: new mongoStore({
-        url: 'mongodb://localhost:27017'
-    }),
-    cookie: { maxAge: 60000 }
+        url: 'mongodb://localhost:27017/test',
+        touchAfter: 24 * 3600
+    })
 });
+
 app.use(sessionParser);
 
 app.use('/', router);

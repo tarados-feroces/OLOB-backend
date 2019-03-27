@@ -1,5 +1,5 @@
 export const mongoose = require('mongoose');
-export const dbConnect = mongoose.connect('mongodb://localhost:27017');
+export const dbConnect = mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true });
 
 export const db = mongoose.connection;
 

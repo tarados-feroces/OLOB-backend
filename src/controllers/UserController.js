@@ -2,6 +2,7 @@ import userService from '../services/UserService';
 
 class UserController {
     async registerUser(req, res) {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         const [status, user] = await userService.registerUser(req.body);
         if (user) {
             req.session.user = { id: user._id, login: user.login };
@@ -12,6 +13,7 @@ class UserController {
     }
 
     async loginUser(req, res) {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         const [status, user] = await userService.loginUser(req.body);
         if (user) {
             req.session.user = { id: user._id, login: user.login };
@@ -23,14 +25,15 @@ class UserController {
     }
 
     async getUser(req, res) {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         console.log(req.session.user);
-        await userService.getAllUsers();
         if (req.session.user) {
             const [status, user] = await userService.getUser(req.session.user.id);
             res.status(status);
             res.send(user);
             res.end();
         } else {
+            console.log('no session');
             res.status(404);
             res.send({});
             res.end();
@@ -38,6 +41,7 @@ class UserController {
     }
 
     async signoutUser(req, res) {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.session.user) {
             delete req.session.user;
             res.status(200);
