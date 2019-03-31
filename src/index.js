@@ -10,20 +10,20 @@ const cors = require('cors');
 const http = require('http');
 import wsServer from './server/WebSocketServer';
 
-// const whitelist = ['http://localhost:8080'];
-// const corsOptions = {
-// 	credentials: true,
-// 	origin: (origin, callback) => {
-//     if (whitelist.includes(origin)) {return callback(null, true)}
-//
-//       callback(new Error('Not allowed by CORS'));
-//   }
-// };
-
+const whitelist = ['http://localhost:8080'];
 const corsOptions = {
-    credentials: true,
-    origin: '*'
+	credentials: true,
+	origin: (origin, callback) => {
+    if (whitelist.includes(origin)) {return callback(null, true)}
+
+      callback(new Error('Not allowed by CORS'));
+  }
 };
+
+// const corsOptions = {
+//     credentials: true,
+//     origin: '*'
+// };
 app.use(cors(corsOptions));
 
 app.use(bodyParser.urlencoded({ extended: true }));
