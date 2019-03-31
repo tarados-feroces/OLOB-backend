@@ -26,3 +26,18 @@ export const userSchema = new mongoose.Schema({
     },
     avatar: String
 });
+
+export const gameSchema = new mongoose.Schema({
+    playerID1: {
+        type: String,
+        unique: true
+    },
+    playerID2: {
+        type: String,
+        unique: true
+    },
+    game: {
+        type: String
+    }
+
+});

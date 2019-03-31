@@ -1,26 +1,28 @@
 import { userModel } from '../models';
+import crypto from 'crypto';
 
 class UserService {
     constructor() {
         this.clients = {};
     }
 
-    addClient(id, ws) {
+    async addClient(id, ws) {
         console.log('add: ', id);
         this.clients[id] = ws;
     }
 
-    removeClient(id) {
+    async removeClient(id) {
         delete this.clients[id];
     }
 
-    sendMessage(id, message) {
+    async sendMessage(id, message) {
         console.log('send: ', id);
         console.log(Object.keys(this.clients));
-        this.clients[id].send(JSON.stringify(message));
+        await this.clients[id].send(JSON.stringify(message));
     }
 
-    async registerUser(userData) {
+    async signupUser(userData) {
+        userData.password = this.hash(userData.password);
         const conflictUser = await userModel.findOne({ $or: [{ login: userData.login }, { email: userData.email }] });
 
         if (conflictUser) {
@@ -33,7 +35,7 @@ class UserService {
     }
 
     async loginUser(userData) {
-        const user = await userModel.findOne({ login: userData.login, password: userData.password });
+        const user = await userModel.findOne({ login: userData.login, password: this.hash(userData.password) });
 
         if (user) {
             return [200, user];
@@ -52,28 +54,30 @@ class UserService {
         return [404, { message: 'User doesn`t exist' }];
     }
 
-    async getAllUsers() {
-        const users = await userModel.find({});
-        return users;
+    async updateUser(_id, data) {
+        const user = await userModel.findOne({ _id });
+
+        if (user) {
+            for (const prop in data) {
+                user[prop] = data[prop];
+            }
+            await user.save();
+            return [200, user];
+        }
+
+        return [404, { message: 'User doesn`t exist' }];
     }
-    //
-    // checkUser(userData) {
-    //     return User
-    //         .findOne({ login: userData.login })
-    //         .then(function(doc) {
-    //             if (doc.password == hash(userData.password)) {
-    //                 console.log('User password is ok');
-    //                 return Promise.resolve(doc);
-    //             } else {
-    //                 return Promise.reject('Error wrong');
-    //             }
-    //         });
-    // }
-    //
-    // static hash(text) {
-    //     return crypto.createHash('sha1')
-    //         .update(text).digest('base64');
-    // }
+
+    async conflictByLoginOrEmail(login, email) {
+        const conflictUser = await userModel.findOne({ $or: [{ login }, { email }] });
+        return !conflictUser;
+    }
+
+    hash(text) {
+        const res = crypto.createHash('sha1').update(text).digest('base64');
+        console.log(res);
+        return res;
+    }
 }
 
 const userService = new UserService();

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "eslint ./src/",
-    "eslint_fix": "eslint --fix ./src/",
+    "eslint-fix": "eslint --fix ./src/",
     "webpack-dev": "./node_modules/.bin/webpack -w --config webpack.config.dev.js --mode=development",
     "webpack": "./node_modules/.bin/webpack --config webpack.config.js --mode=production",
     "start": "nodemon ./dist/bundle.js",
@@ -16,7 +16,7 @@
     "local_start": "./helpers/install.sh && ./helpers/local_start.sh"
   },
   "pre-commit": [
-    "eslint"
+    "eslint-fix"
   ],
   "author": "",
   "license": "ISC",

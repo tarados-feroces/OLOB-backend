@@ -74,6 +74,10 @@ class GameService {
             captured: Boolean(item.captured)
         };
     }
+
+    saveGame(game, player1, player2) {
+
+    }
 }
 
 const gameService = new GameService();

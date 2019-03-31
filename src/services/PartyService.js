@@ -1,4 +1,6 @@
 'use strict';
+import { gameModel } from '../models';
+
 const crypto = require('crypto');
 
 class PartyService {
@@ -19,6 +21,8 @@ class PartyService {
 
         this.userToParty[playerID1] = partyID;
         this.userToParty[playerID2] = partyID;
+
+        this.save(playerID1, playerID2, game);
     }
 
     delete(id) {
@@ -48,6 +52,10 @@ class PartyService {
         return this.parties[partyID].playerID1 === req.session.user.id ?
             this.parties[partyID].playerID2 :
             this.parties[partyID].playerID1;
+    }
+
+    async save(playerID1, playerID2, game) {
+        await gameModel.create({ playerID1, playerID2, game });
     }
 }
 
