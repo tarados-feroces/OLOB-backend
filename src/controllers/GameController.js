@@ -29,12 +29,12 @@ class GameController {
         const newGame = gameService.init(userID1, userID2);
         partyService.add(userID1, userID2, newGame);
 
-        const whiteUserOpponent = await userService.getUser(userID2)[1];
-        const blackUserOpponent = await userService.getUser(userID1)[1];
+        const whiteUserOpponent = await userService.getUser(userID2);
+        const blackUserOpponent = await userService.getUser(userID1);
 
         const gameCreatedWhite = {
             data: {
-                opponent: { ...whiteUserOpponent},
+                opponent: whiteUserOpponent[1],
                 fen: newGame,
                 situation: {},
                 currentUser: userID1,
@@ -45,7 +45,7 @@ class GameController {
 
         const gameCreatedBlack = {
             data: {
-                opponent: { ...blackUserOpponent },
+                opponent: blackUserOpponent[1],
                 fen: newGame,
                 situation: {},
                 currentUser: userID1,
@@ -56,7 +56,7 @@ class GameController {
 
         userService.sendMessage(userID1, gameCreatedWhite);
         userService.sendMessage(userID2, gameCreatedBlack);
-    };
+    }
 
     sendSnapshot = (data, req) => {
         const party = partyService.getCurrentParty(req);
@@ -65,13 +65,16 @@ class GameController {
             data.situation.type === GameStatus.MATE &&
             this.gameEnded(data.currentUser === 'w' ? party.playerID2 : party.playerID1, req);
 
+        const currentUser = data.currentUser && data.currentUser === 'b' ? party.playerID2 : party.playerID1;
+        console.log('CURRENT: ', currentUser);
+
         this._sendData({
             data: {
                 fen: data.fen,
                 situation: {
                     type: data.situation ? data.situation : ''
                 },
-                currentUser: data.currentUser && data.currentUser === 'b' ? party.playerID2 : party.playerID1
+                currentUser
             },
             cls: gameMessageTypes.SNAPSHOT }, req);
     };

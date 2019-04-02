@@ -49,6 +49,8 @@ class GameService {
         //     }
         // }
 
+        console.log(this.chess.turn());
+
         return {
             fen: this.chess.fen(),
             situation,

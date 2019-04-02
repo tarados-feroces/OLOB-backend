@@ -26,8 +26,8 @@ const corsOptions = {
 // };
 app.use(cors(corsOptions));
 
-app.use(bodyParser.urlencoded({ limit: "5mb", extended: true, parameterLimit: 5000 }));
-app.use(bodyParser.json({ limit: "5mb" }));
+app.use(bodyParser.urlencoded({ limit: '5mb', extended: true, parameterLimit: 5000 }));
+app.use(bodyParser.json({ limit: '5mb' }));
 
 app.use(require('cookie-parser')());
 const sessionParser = session({
