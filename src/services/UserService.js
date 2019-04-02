@@ -48,6 +48,7 @@ class UserService {
         const user = await userModel.findById(id);
 
         if (user) {
+            user.password = undefined;
             return [200, user];
         }
 

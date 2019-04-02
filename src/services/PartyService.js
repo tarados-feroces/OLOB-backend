@@ -22,14 +22,16 @@ class PartyService {
         this.userToParty[playerID1] = partyID;
         this.userToParty[playerID2] = partyID;
 
-        this.save(playerID1, playerID2, game);
+        // this.save(playerID1, playerID2, game, partyID);
     }
 
-    delete(id) {
+    async delete(id) {
         const { playerID1, playerID2 } = this.parties[id];
         delete this.parties[id];
         delete this.userToParty[playerID1];
         delete this.userToParty[playerID2];
+
+        // await gameModel.findOneAndRemove({ partyID: id });
     }
 
     _countPartyID(playerID1, playerID2) {
@@ -43,19 +45,23 @@ class PartyService {
         return this.parties[this.userToParty[req.session.user.id]];
     }
 
+    getCurrentPartyID(req) {
+        return this.userToParty[req.session.user.id];
+    }
+
     updatePartyGame(req, game) {
         this.parties[this.userToParty[req.session.user.id]].game = game;
     }
 
     getEnemyOfUser(req) {
-        const partyID = this.getCurrentParty(req);
-        return this.parties[partyID].playerID1 === req.session.user.id ?
-            this.parties[partyID].playerID2 :
-            this.parties[partyID].playerID1;
+        const party = this.getCurrentParty(req);
+        return party.playerID1 === req.session.user.id ?
+            party.playerID2 :
+            party.playerID1;
     }
 
-    async save(playerID1, playerID2, game) {
-        await gameModel.create({ playerID1, playerID2, game });
+    async save(playerID1, playerID2, game, partyID) {
+        await gameModel.create({ playerID1, playerID2, game, partyID });
     }
 }
 

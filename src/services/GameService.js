@@ -75,8 +75,9 @@ class GameService {
         };
     }
 
-    saveGame(game, player1, player2) {
-
+    getCurrentUser(game) {
+        this.chess.load(game);
+        return this.chess.turn();
     }
 }
 

@@ -25,34 +25,37 @@ class GameController {
         }
     };
 
-    startGame = (userID1, userID2) => {
+    async startGame(userID1, userID2) {
         const newGame = gameService.init(userID1, userID2);
-            partyService.add(userID1, userID2, newGame);
+        partyService.add(userID1, userID2, newGame);
 
-            const gameCreatedWhite = {
-                data: {
-                    opponent: { login: userService.getUser(userID2).login, id: userID2 },
-                    fen: newGame,
-                    situation: {},
-                    currentUser: userID1,
-                    side: 0
-                },
-                cls: gameMessageTypes.STARTED
-            };
+        const whiteUserOpponent = await userService.getUser(userID2)[1];
+        const blackUserOpponent = await userService.getUser(userID1)[1];
 
-            const gameCreatedBlack = {
-                data: {
-                    opponent: { login: userService.getUser(userID1).login, id: userID1 },
-                    fen: newGame,
-                    situation: {},
-                    currentUser: userID2,
-                    side: 1
-                },
-                cls: gameMessageTypes.STARTED
-            };
+        const gameCreatedWhite = {
+            data: {
+                opponent: { ...whiteUserOpponent},
+                fen: newGame,
+                situation: {},
+                currentUser: userID1,
+                side: 0
+            },
+            cls: gameMessageTypes.STARTED
+        };
 
-            userService.sendMessage(userID1, gameCreatedWhite);
-            userService.sendMessage(userID2, gameCreatedBlack);
+        const gameCreatedBlack = {
+            data: {
+                opponent: { ...blackUserOpponent },
+                fen: newGame,
+                situation: {},
+                currentUser: userID1,
+                side: 1
+            },
+            cls: gameMessageTypes.STARTED
+        };
+
+        userService.sendMessage(userID1, gameCreatedWhite);
+        userService.sendMessage(userID2, gameCreatedBlack);
     };
 
     sendSnapshot = (data, req) => {
@@ -74,7 +77,7 @@ class GameController {
     };
 
     gameEnded = (winnerID, req) => {
-        console.log('#########################################################');
+        partyService.delete(partyService.getCurrentPartyID(req));
         this._sendData({
             data: {
                 winner: winnerID
@@ -87,8 +90,6 @@ class GameController {
         const game = party.game;
 
         const result = gameService.makeStep(game, data.step);
-
-        console.log('STATUS: ', result.situation);
 
         partyService.updatePartyGame(req, result.fen);
 

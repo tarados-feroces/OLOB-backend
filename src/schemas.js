@@ -36,8 +36,7 @@ export const gameSchema = new mongoose.Schema({
         type: String,
         unique: true
     },
-    game: {
+    partyID: {
         type: String
     }
-
 });
