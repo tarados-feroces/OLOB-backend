@@ -3,6 +3,7 @@
 import userService from '../services/UserService';
 import { DEFAULT_AVATAR } from '../constants/UserConstants';
 import partyService from '../services/PartyService';
+import gameService from "../services/GameService";
 
 class UserController {
     async registerUser(req, res) {
@@ -38,12 +39,12 @@ class UserController {
             const game = party ? {
                 fen: party.game,
                 situation: {},
-                currentUser: req.session.user.id,
+                currentUser: gameService.getCurrentUser(party.game) === 'b' ? party.playerID2 : party.playerID1,
                 side: party.playerID1 === req.session.user.id ? 0 : 1
             } : {};
 
             const opponent = party ?
-                await userService.getUser(party.playerID1 === req.session.user.id ? party.playerID2 : party.playerID1):
+                await userService.getUser(party.playerID1 === req.session.user.id ? party.playerID2 : party.playerID1) :
                 [];
             game.opponent = opponent[1];
 
