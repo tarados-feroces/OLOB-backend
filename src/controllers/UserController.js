@@ -36,17 +36,17 @@ class UserController {
             const [status, user] = await userService.getUser(req.session.user.id);
 
             const party = partyService.getCurrentParty(req);
-            const game = party ? {
-                fen: party.game,
-                situation: {},
-                currentUser: gameService.getCurrentUser(party.game) === 'b' ? party.playerID2 : party.playerID1,
-                side: party.playerID1 === req.session.user.id ? 0 : 1
-            } : {};
-
             const opponent = party ?
                 await userService.getUser(party.playerID1 === req.session.user.id ? party.playerID2 : party.playerID1) :
                 [];
-            game.opponent = opponent[1];
+
+            const game = party ? {
+                fen: party.game,
+                opponent: opponent[1],
+                situation: {},
+                currentUser: gameService.getCurrentUser(party.game) === 'b' ? party.playerID2 : party.playerID1,
+                side: party.playerID1 === req.session.user.id ? 0 : 1
+            } : null;
 
             res.status(status);
             res.send({ user, game });
