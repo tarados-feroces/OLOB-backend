@@ -25,6 +25,12 @@ class GameController {
         }
     };
 
+    leaveGame = (req) => {
+        const { playerID1, playerID2 } = partyService.getCurrentParty(req);
+        const winner = playerID1 === req.session.user.id ? playerID2 : playerID1;
+        this.gameEnded(winner, req);
+    };
+
     async startGame(userID1, userID2) {
         const newGame = gameService.init(userID1, userID2);
         partyService.add(userID1, userID2, newGame);
@@ -118,6 +124,14 @@ class GameController {
         const { playerID1, playerID2 } = partyService.getCurrentParty(req);
         userService.sendMessage(playerID1, message);
         userService.sendMessage(playerID2, message);
+    };
+
+    sendOpponentDisconnect = (disconnectedID) => {
+        const winnerID = partyService.getEnemyOfUser(disconnectedID);
+        if (!winnerID || winnerID === disconnectedID) {
+            return;
+        }
+        userService.sendMessage(winnerID, { cls: gameMessageTypes.OPPONENT_DISCONNECT });
     };
 }
 

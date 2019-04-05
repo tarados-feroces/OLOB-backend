@@ -53,9 +53,13 @@ class PartyService {
         this.parties[this.userToParty[req.session.user.id]].game = game;
     }
 
-    getEnemyOfUser(req) {
-        const party = this.getCurrentParty(req);
-        return party.playerID1 === req.session.user.id ?
+    getUserParty(id) {
+        return this.parties[this.userToParty[id]];
+    }
+
+    getEnemyOfUser(id) {
+        const party = this.getUserParty(id);
+        return party.playerID1 === id ?
             party.playerID2 :
             party.playerID1;
     }

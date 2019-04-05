@@ -6,9 +6,13 @@ class UserService {
         this.clients = {};
     }
 
-    async addClient(id, ws) {
+    addClient(id, ws) {
         console.log('add: ', id);
         this.clients[id] = ws;
+    }
+
+    getClients() {
+        return this.clients;
     }
 
     async removeClient(id) {

@@ -3,7 +3,7 @@
 import userService from '../services/UserService';
 import { DEFAULT_AVATAR } from '../constants/UserConstants';
 import partyService from '../services/PartyService';
-import gameService from "../services/GameService";
+import gameService from '../services/GameService';
 
 class UserController {
     async registerUser(req, res) {
@@ -84,6 +84,7 @@ class UserController {
     async signoutUser(req, res) {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.session.user) {
+            userService.getClients()[req.session.user.id].terminate();
             req.session.user = undefined;
             res.status(200);
             res.end();

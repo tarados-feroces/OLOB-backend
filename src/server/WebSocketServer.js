@@ -1,11 +1,18 @@
 'use strict';
 import gameController from '../controllers/GameController';
 import userService from '../services/UserService';
+import partyService from '../services/PartyService';
 
 class WebSocketServer {
     constructor() {
         this.start = this.start.bind(this);
     }
+
+    noop = () => {};
+
+    heartbeat = (ws) => {
+        ws.isAlive = true;
+    };
 
     start(sessionParser, server) {
         const WebSocketServer = require('ws');
@@ -20,6 +27,8 @@ class WebSocketServer {
         });
 
         webSocketServer.on('connection', (ws, req) => {
+            ws.isAlive = true;
+            ws.on('pong', this.heartbeat.bind(this, ws));
             userService.addClient(req.session.user.id, ws);
             console.log(`new connection: ${req.session.user.login}`);
 
@@ -31,9 +40,26 @@ class WebSocketServer {
 
             ws.on('close', () => {
                 console.log(`connection closed ${req.session.user.login}`);
-                delete userService.removeClient(req.session.user.id);
+                userService.removeClient(req.session.user.id);
             });
         });
+
+        setInterval(() => {
+            const clients = userService.getClients();
+            Object.keys(clients).forEach((clientID) => {
+                const ws = clients[clientID];
+                if (ws.isAlive === false) {
+                    console.log('opp dis');
+                    if (partyService.getUserParty(clientID)) {
+                        gameController.sendOpponentDisconnect(clientID);
+                    }
+                    return ws.terminate();
+                }
+
+                ws.isAlive = false;
+                ws.ping(this.noop());
+            });
+        }, 1000);
     }
 }
 

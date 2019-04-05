@@ -5,7 +5,9 @@ export const gameMessageTypes = {
     STEP: 'Step',
     UPDATE: 'UpdateState',
     SNAPSHOT: 'Snapshot',
-    AREAS: 'Areas'
+    AREAS: 'Areas',
+    OPPONENT_DISCONNECT: 'OPPONENT_DISCONNECT',
+    DISCONNECT: 'DISCONNECT'
 };
 
 export const GameStatus = {
