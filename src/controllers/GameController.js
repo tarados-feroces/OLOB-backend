@@ -41,7 +41,8 @@ class GameController {
         userService.sendMessage(winnerID, { data: {
             winner: winnerID
             }, cls: gameMessageTypes.FINISHED });
-        userService.removeClient(req.session.user.id);
+        partyService.delete(partyService.getCurrentPartyID(req));
+        // userService.removeClient(req.session.user.id);
     };
 
     async startGame(userID1, userID2) {
