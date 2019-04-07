@@ -6,8 +6,8 @@ export const gameMessageTypes = {
     UPDATE: 'UpdateState',
     SNAPSHOT: 'Snapshot',
     AREAS: 'Areas',
-    OPPONENT_DISCONNECT: 'OPPONENT_DISCONNECT',
-    DISCONNECT: 'DISCONNECT'
+    OPPONENT_DISCONNECT: 'Opponent_Disconnect',
+    DISCONNECT: 'Disconnect'
 };
 
 export const GameStatus = {
