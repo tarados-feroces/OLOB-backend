@@ -51,7 +51,7 @@ class WebSocketServer {
                 const ws = clients[clientID];
                 if (ws.isAlive === false) {
                     console.log('opp dis');
-                    gameController.onDeleteWSSession(clientID, true);
+                    gameController.onDeleteWSSession(clientID);
                     return ws.terminate();
                 }
 
