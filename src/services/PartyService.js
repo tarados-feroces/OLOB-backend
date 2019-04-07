@@ -26,10 +26,11 @@ class PartyService {
     }
 
     async delete(id) {
+        console.log('deleting party');
         const { playerID1, playerID2 } = this.parties[id];
-        delete this.parties[id];
-        delete this.userToParty[playerID1];
-        delete this.userToParty[playerID2];
+        this.parties[id] = undefined;
+        this.userToParty[playerID1] = undefined;
+        this.userToParty[playerID2] = undefined;
 
         // await gameModel.findOneAndRemove({ partyID: id });
     }
@@ -55,6 +56,10 @@ class PartyService {
 
     getUserParty(id) {
         return this.parties[this.userToParty[id]];
+    }
+
+    getUserPartyID(id) {
+        return this.userToParty[id];
     }
 
     getEnemyOfUser(id) {

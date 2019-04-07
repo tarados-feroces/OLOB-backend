@@ -84,7 +84,7 @@ class UserController {
     async signoutUser(req, res) {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.session.user) {
-            userService.getClients()[req.session.user.id].terminate();
+            userService.getClients()[req.session.user.id].isAlive = false;
             req.session.user = undefined;
             res.status(200);
             res.end();

@@ -25,10 +25,22 @@ class GameController {
         }
     };
 
-    leaveGame = (req) => {
-        const { playerID1, playerID2 } = partyService.getCurrentParty(req);
-        const winner = playerID1 === req.session.user.id ? playerID2 : playerID1;
-        this.gameEnded(winner, req);
+    onDeleteWSSession = (clientID, isDisconnected) => {
+        console.log('deleting game');
+        const partyID = partyService.getUserPartyID(clientID);
+        if (partyID) {
+            isDisconnected ? this.sendOpponentDisconnect(clientID) : this.leaveGame(clientID);
+            partyService.delete(partyID);
+        }
+    };
+
+    leaveGame = (clientID) => {
+        const { playerID1, playerID2 } = partyService.getUserParty(clientID);
+        const winnerID = playerID1 === clientID ? playerID2 : playerID1;
+        userService.sendMessage(winnerID, { data: {
+            winner: winnerID
+            }, cls: gameMessageTypes.FINISHED });
+        userService.removeClient(clientID);
     };
 
     async startGame(userID1, userID2) {
@@ -131,7 +143,11 @@ class GameController {
         if (!winnerID || winnerID === disconnectedID) {
             return;
         }
-        userService.sendMessage(winnerID, { cls: gameMessageTypes.OPPONENT_DISCONNECT });
+        userService.sendMessage(winnerID, { data: {
+                winner: winnerID
+            },
+            cls: gameMessageTypes.FINISHED });
+        userService.removeClient(disconnectedID);
     };
 }
 

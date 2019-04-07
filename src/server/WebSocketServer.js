@@ -1,7 +1,6 @@
 'use strict';
 import gameController from '../controllers/GameController';
 import userService from '../services/UserService';
-import partyService from '../services/PartyService';
 
 class WebSocketServer {
     constructor() {
@@ -40,26 +39,26 @@ class WebSocketServer {
 
             ws.on('close', () => {
                 console.log(`connection closed ${req.session.user.login}`);
+                // gameController.onDeleteWSSession(req.session.user.id, false);
                 userService.removeClient(req.session.user.id);
             });
         });
 
+        /* eslint-disable no-undef */
         setInterval(() => {
             const clients = userService.getClients();
             Object.keys(clients).forEach((clientID) => {
                 const ws = clients[clientID];
                 if (ws.isAlive === false) {
                     console.log('opp dis');
-                    if (partyService.getUserParty(clientID)) {
-                        gameController.sendOpponentDisconnect(clientID);
-                    }
+                    gameController.onDeleteWSSession(clientID, true);
                     return ws.terminate();
                 }
 
                 ws.isAlive = false;
                 ws.ping(this.noop());
             });
-        }, 1000);
+        }, 10000);
     }
 }
 
