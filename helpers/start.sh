@@ -1,4 +1,4 @@
 #!/bin/bash
 
 service mongodb start
-npm start
+node dist

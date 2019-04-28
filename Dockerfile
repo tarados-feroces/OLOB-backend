@@ -32,11 +32,11 @@ RUN apt-get install -y nodejs
 ADD . /tf_tracker
 WORKDIR /tf_tracker
 RUN ./helpers/install.sh
-# RUN cat ./supervisor.conf > /etc/supervisor/conf.d/mongo.conf
-# RUN service supervisor start && supervisorctl reload && supervisorctl update
+RUN cat ./supervisor.conf > /etc/supervisor/conf.d/mongo.conf
+RUN service supervisor start && supervisorctl reload && supervisorctl update
 RUN npm run webpack
 RUN chmod +x
-# RUN /usr/bin/mongod
+RUN /usr/bin/mongod
 
 # Run server
 ENTRYPOINT ["./helpers/start.sh"]
