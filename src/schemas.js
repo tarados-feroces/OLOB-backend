@@ -24,7 +24,13 @@ export const userSchema = new mongoose.Schema({
         maxlength: [32, 'tooLong'],
         minlength: [2, 'tooShort']
     },
-    avatar: String
+    avatar: String,
+    games: [
+        {
+            opponent: String,
+            winner: String
+        }
+    ]
 });
 
 export const gameSchema = new mongoose.Schema({

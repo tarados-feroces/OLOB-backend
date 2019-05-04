@@ -9,38 +9,42 @@ class GameController {
         this.gameQueue = [];
 
         this.messageHandlers = {
-            [gameMessageTypes.SEARCH]: this.searchGame,
-            [gameMessageTypes.STEP]: this.makeStep,
-            [gameMessageTypes.AREAS]: this.getAvailableMoves,
-            [gameMessageTypes.SNAPSHOT]: this.sendSnapshot,
-            [gameMessageTypes.DISCONNECT]: this.leaveGame
+            [ gameMessageTypes.SEARCH ]: this.searchGame.bind(this),
+            [ gameMessageTypes.STEP ]: this.makeStep,
+            [ gameMessageTypes.AREAS ]: this.getAvailableMoves,
+            [ gameMessageTypes.SNAPSHOT ]: this.sendSnapshot,
+            [ gameMessageTypes.DISCONNECT ]: this.leaveGame,
+            [ gameMessageTypes.CHAT_MESSAGE ]: this.chatMessage,
         };
     }
 
-    searchGame = (message, req) => {
+    async searchGame (message, req) {
         const nextPlayer = this.gameQueue.shift();
         if (!nextPlayer) {
             this.gameQueue.push(req.session.user.id);
         } else {
-            this.startGame(req.session.user.id, nextPlayer);
+            await this.startGame(req.session.user.id, nextPlayer);
         }
     };
 
-    onDeleteWSSession = (clientID) => {
+    async onDeleteWSSession (clientID) {
         console.log('deleting game');
         const partyID = partyService.getUserPartyID(clientID);
         if (partyID) {
-            this.sendOpponentDisconnect(clientID);
-            partyService.delete(partyID);
+            await this.sendOpponentDisconnect(clientID);
+            await partyService.delete(partyID);
         }
     };
 
     leaveGame = (data, req) => {
         const { playerID1, playerID2 } = partyService.getCurrentParty(req);
         const winnerID = playerID1 === req.session.user.id ? playerID2 : playerID1;
+        this.saveGameData(playerID1, playerID2, winnerID);
+
         userService.sendMessage(winnerID, { data: {
             winner: winnerID
             }, cls: gameMessageTypes.FINISHED });
+
         partyService.delete(partyService.getCurrentPartyID(req));
         // userService.removeClient(req.session.user.id);
     };
@@ -55,7 +59,7 @@ class GameController {
         const gameCreatedWhite = {
             data: {
                 opponent: whiteUserOpponent[1],
-                fen: newGame,
+                fen: newGame.fen(),
                 situation: {},
                 currentUser: userID1,
                 side: 0
@@ -66,7 +70,7 @@ class GameController {
         const gameCreatedBlack = {
             data: {
                 opponent: blackUserOpponent[1],
-                fen: newGame,
+                fen: newGame.fen(),
                 situation: {},
                 currentUser: userID1,
                 side: 1
@@ -74,11 +78,11 @@ class GameController {
             cls: gameMessageTypes.STARTED
         };
 
-        userService.sendMessage(userID1, gameCreatedWhite);
-        userService.sendMessage(userID2, gameCreatedBlack);
+        await userService.sendMessage(userID1, gameCreatedWhite);
+        await userService.sendMessage(userID2, gameCreatedBlack);
     }
 
-    sendSnapshot = (data, req) => {
+    async sendSnapshot (data, req) {
         const party = partyService.getCurrentParty(req);
 
         data.situation &&
@@ -88,9 +92,9 @@ class GameController {
         const currentUser = data.currentUser && data.currentUser === 'b' ? party.playerID2 : party.playerID1;
         console.log('CURRENT: ', currentUser);
 
-        this._sendData({
+        await this._sendData({
             data: {
-                fen: data.fen,
+                fen: data.chess.fen(),
                 situation: {
                     type: data.situation ? data.situation : ''
                 },
@@ -99,13 +103,15 @@ class GameController {
             cls: gameMessageTypes.SNAPSHOT }, req);
     };
 
-    gameEnded = (winnerID, req) => {
-        partyService.delete(partyService.getCurrentPartyID(req));
-        this._sendData({
+    async gameEnded (winnerID, req) {
+        const { playerID1, playerID2 } = partyService.getCurrentParty(req);
+        await this.saveGameData(playerID1, playerID2, winnerID);
+        await this._sendData({
             data: {
                 winner: winnerID
             },
             cls: gameMessageTypes.FINISHED }, req);
+        await partyService.delete(partyService.getCurrentPartyID(req));
     };
 
     makeStep = (data, req) => {
@@ -114,19 +120,17 @@ class GameController {
 
         const result = gameService.makeStep(game, data.step);
 
-        partyService.updatePartyGame(req, result.fen);
+        partyService.updatePartyGame(req, result.chess);
 
         this.sendSnapshot(result, req);
     };
 
-    getAvailableMoves = (data, req) => {
+    async getAvailableMoves (data, req) {
         const party = partyService.getCurrentParty(req);
         const game = party.game;
         const steps = gameService.getAvailableMoves(game, data.position);
 
-        console.log('STEPS: ', steps);
-
-        userService.sendMessage(req.session.user.id, {
+        await userService.sendMessage(req.session.user.id, {
             data: {
                 steps: steps
             },
@@ -134,22 +138,42 @@ class GameController {
         });
     };
 
-    _sendData = (message, req) => {
-        const { playerID1, playerID2 } = partyService.getCurrentParty(req);
-        userService.sendMessage(playerID1, message);
-        userService.sendMessage(playerID2, message);
+    async chatMessage (data, req) {
+        await this._sendData({
+            cls: gameMessageTypes.CHAT_MESSAGE,
+            data: {
+                message: data
+            }
+        }, req)
     };
 
-    sendOpponentDisconnect = (disconnectedID) => {
+    async _sendData (message, req) {
+        const { playerID1, playerID2 } = partyService.getCurrentParty(req);
+        await userService.sendMessage(playerID1, message);
+        await userService.sendMessage(playerID2, message);
+    };
+
+    async saveGameData (playerID1, playerID2, winner) {
+        await userService.addUserGame(playerID1, {
+            opponent: playerID2,
+            winner
+        });
+        await userService.addUserGame(playerID2, {
+            opponent: playerID1,
+            winner
+        });
+    };
+
+    async sendOpponentDisconnect (disconnectedID) {
         const winnerID = partyService.getEnemyOfUser(disconnectedID);
         if (!winnerID || winnerID === disconnectedID) {
             return;
         }
-        userService.sendMessage(winnerID, { data: {
+        await userService.sendMessage(winnerID, { data: {
                 winner: winnerID
             },
             cls: gameMessageTypes.FINISHED });
-        userService.removeClient(disconnectedID);
+        await userService.removeClient(disconnectedID);
     };
 }
 

@@ -93,6 +93,19 @@ class UserController {
             res.end();
         }
     }
+
+    async getUserGames(req, res) {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        if (req.session.user) {
+            const [ status, games ] = await userService.getUserGames(req.session.user.id);
+            res.status(status);
+            res.send({ games });
+            res.end();
+        } else {
+            res.status(404);
+            res.end();
+        }
+    }
 }
 
 const userController = new UserController();

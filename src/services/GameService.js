@@ -5,31 +5,30 @@ const Chess = require('chess.js');
 
 class GameService {
     init(player1, player2) {
-        this.chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-        this.chess.header('White', player1);
-        this.chess.header('Black', player2);
+        const chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+        chess.header('White', player1);
+        chess.header('Black', player2);
 
-        return this.chess.fen();
+        return chess;
     }
 
-    makeStep(game, step) {
-        this.chess.load(game);
+    makeStep(chess, step) {
         console.log({
             from: this._transpileCoordsToStep(step.prevPos),
             to: this._transpileCoordsToStep(step.nextPos)
         });
-        this.chess.move({
+        chess.move({
             from: this._transpileCoordsToStep(step.prevPos),
             to: this._transpileCoordsToStep(step.nextPos)
         });
 
         let status = false;
 
-        if (this.chess.in_check()) {
+        if (chess.in_check()) {
             status = GameStatus.CHECK;
         }
 
-        if (this.chess.game_over()) {
+        if (chess.game_over()) {
             status = GameStatus.MATE;
         }
 
@@ -49,18 +48,17 @@ class GameService {
         //     }
         // }
 
-        console.log(this.chess.turn());
+        console.log(chess.turn());
 
         return {
-            fen: this.chess.fen(),
+            chess,
             situation,
-            currentUser: this.chess.turn()
+            currentUser: chess.turn()
         };
     }
 
-    getAvailableMoves(game, pos) {
-        this.chess.load(game);
-        const steps = this.chess.moves({ square: this._transpileCoordsToStep(pos), verbose: true });
+    getAvailableMoves(chess, pos) {
+        const steps = chess.moves({ square: this._transpileCoordsToStep(pos), verbose: true });
         console.log(steps);
         return steps.map((item) => this._transpileStepToCoords(item));
     }
@@ -77,9 +75,8 @@ class GameService {
         };
     }
 
-    getCurrentUser(game) {
-        this.chess.load(game);
-        return this.chess.turn();
+    getCurrentUser(chess) {
+        return chess.turn();
     }
 }
 

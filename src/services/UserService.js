@@ -73,6 +73,28 @@ class UserService {
         return [404, { message: 'User doesn`t exist' }];
     }
 
+    async getUserGames(_id) {
+        const user = await userModel.findOne({ _id });
+
+        if (user) {
+            return [200, user.games];
+        }
+
+        return [404, { message: 'User doesn`t exist' }];
+    }
+
+    async addUserGame(_id, game) {
+        const user = await userModel.findOne({ _id });
+
+        if (user) {
+            user.games.push(game);
+            user.save();
+            return [200, user]
+        }
+
+        return [404, { message: 'User doesn`t exist' }];
+    }
+
     async conflictByLoginOrEmail(login, email) {
         const conflictUser = await userModel.findOne({ $or: [{ login }, { email }] });
         return !conflictUser;
