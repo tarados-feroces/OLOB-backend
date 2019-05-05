@@ -1,6 +1,6 @@
 'use strict';
 import partyService from '../services/PartyService';
-import {gameMessageTypes, GameStatus, Side} from '../constants/GameConstants';
+import { gameMessageTypes, GameStatus, Side } from '../constants/GameConstants';
 import userService from '../services/UserService';
 import gameService from '../services/GameService';
 
@@ -10,11 +10,11 @@ class GameController {
 
         this.messageHandlers = {
             [ gameMessageTypes.SEARCH ]: this.searchGame.bind(this),
-            [ gameMessageTypes.STEP ]: this.makeStep,
-            [ gameMessageTypes.AREAS ]: this.getAvailableMoves,
-            [ gameMessageTypes.SNAPSHOT ]: this.sendSnapshot,
-            [ gameMessageTypes.DISCONNECT ]: this.leaveGame,
-            [ gameMessageTypes.CHAT_MESSAGE ]: this.chatMessage
+            [ gameMessageTypes.STEP ]: this.makeStep.bind(this),
+            [ gameMessageTypes.AREAS ]: this.getAvailableMoves.bind(this),
+            [ gameMessageTypes.SNAPSHOT ]: this.sendSnapshot.bind(this),
+            [ gameMessageTypes.DISCONNECT ]: this.leaveGame.bind(this),
+            [ gameMessageTypes.CHAT_MESSAGE ]: this.chatMessage.bind(this)
         };
     }
 
@@ -36,16 +36,16 @@ class GameController {
         }
     }
 
-    leaveGame = (data, req) => {
+    async leaveGame(data, req) {
         const { playerID1, playerID2 } = partyService.getCurrentParty(req);
         const winnerID = playerID1 === req.session.user.id ? playerID2 : playerID1;
-        this.saveGameData(playerID1, playerID2, winnerID);
+        await this.saveGameData(playerID1, playerID2, winnerID);
 
-        userService.sendMessage(winnerID, { data: {
+        await userService.sendMessage(winnerID, { data: {
             winner: winnerID
             }, cls: gameMessageTypes.FINISHED });
 
-        partyService.delete(partyService.getCurrentPartyID(req));
+        await partyService.delete(partyService.getCurrentPartyID(req));
         // userService.removeClient(req.session.user.id);
     };
 
@@ -114,7 +114,7 @@ class GameController {
         await partyService.delete(partyService.getCurrentPartyID(req));
     }
 
-    makeStep = (data, req) => {
+    async makeStep(data, req) {
         const party = partyService.getCurrentParty(req);
         const game = party.game;
 
@@ -122,7 +122,7 @@ class GameController {
 
         partyService.updatePartyGame(req, result.chess);
 
-        this.sendSnapshot(result, req);
+        await this.sendSnapshot(result, req);
     };
 
     async getAvailableMoves(data, req) {
