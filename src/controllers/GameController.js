@@ -47,7 +47,7 @@ class GameController {
 
         await partyService.delete(partyService.getCurrentPartyID(req));
         // userService.removeClient(req.session.user.id);
-    };
+    }
 
     async startGame(userID1, userID2) {
         const newGame = gameService.init(userID1, userID2);
@@ -123,7 +123,7 @@ class GameController {
         partyService.updatePartyGame(req, result.chess);
 
         await this.sendSnapshot(result, req);
-    };
+    }
 
     async getAvailableMoves(data, req) {
         const party = partyService.getCurrentParty(req);
