@@ -20,8 +20,6 @@ class UserService {
     }
 
     async sendMessage(id, message) {
-        console.log('send: ', id);
-        console.log(Object.keys(this.clients));
         await this.clients[id].send(JSON.stringify(message));
     }
 
@@ -89,7 +87,7 @@ class UserService {
         if (user) {
             user.games.push(game);
             user.save();
-            return [200, user]
+            return [200, user];
         }
 
         return [404, { message: 'User doesn`t exist' }];
@@ -102,7 +100,6 @@ class UserService {
 
     hash(text) {
         const res = crypto.createHash('sha1').update(text).digest('base64');
-        console.log(res);
         return res;
     }
 }

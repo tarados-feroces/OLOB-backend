@@ -28,7 +28,8 @@ export const userSchema = new mongoose.Schema({
     games: [
         {
             opponent: String,
-            winner: String
+            winner: String,
+            side: String
         }
     ]
 });

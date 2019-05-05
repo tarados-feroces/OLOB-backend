@@ -97,7 +97,7 @@ class UserController {
     async getUserGames(req, res) {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.session.user) {
-            const [ status, games ] = await userService.getUserGames(req.session.user.id);
+            const [status, games] = await userService.getUserGames(req.session.user.id);
             res.status(status);
             res.send({ games });
             res.end();
