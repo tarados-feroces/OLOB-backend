@@ -41,7 +41,7 @@ class UserController {
                 [];
 
             const game = party ? {
-                fen: party.game.fen,
+                fen: party.game.fen(),
                 opponent: opponent[1],
                 situation: {},
                 currentUser: gameService.getCurrentUser(party.game) === 'b' ? party.playerID2 : party.playerID1,
