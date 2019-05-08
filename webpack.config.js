@@ -4,7 +4,9 @@ module.exports = {
     ],
 
     output: {
-        filename: 'bundle.js'
+        filename: 'bundle.js',
+        library: "my-library",
+        libraryTarget: "umd"
     },
 
     target: 'node',
@@ -21,7 +23,11 @@ module.exports = {
                     presets: ['@babel/preset-env'],
                     plugins: ['transform-class-properties']
                 }
-            }
+            },
+            {
+                test: /\.node$/,
+                use: 'node-loader'
+            },
         ]
     }
 };

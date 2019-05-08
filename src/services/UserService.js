@@ -1,5 +1,8 @@
 import { userModel } from '../models';
 import crypto from 'crypto';
+import btoa from 'btoa';
+import sharp from 'sharp';
+import { Buffer } from 'buffer';
 
 class UserService {
     constructor() {
@@ -62,6 +65,9 @@ class UserService {
 
         if (user) {
             for (const prop in data) {
+                if (prop === 'avatar') {
+                    data[prop] = await this.cropUserAvatar(data[prop], data.options);
+                }
                 user[prop] = data[prop];
             }
             await user.save();
@@ -101,6 +107,30 @@ class UserService {
     hash(text) {
         const res = crypto.createHash('sha1').update(text).digest('base64');
         return res;
+    }
+
+    async cropUserAvatar(avatar, options = {left: 200, top: 200, width: 150, height: 150}) {
+        console.log(avatar.length);
+
+        const croppedAvatar = avatar.replace(/.*;base64,/, '');
+        console.log(croppedAvatar[0]);
+        const data = Buffer.from(croppedAvatar, 'base64');
+        let newAvatar = await sharp(data)
+            .extract(options)
+            .png()
+            .toBuffer();
+
+        return `data:image/png;base64,${this._arrayBufferToBase64(newAvatar)}`;
+    }
+
+     _arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[ i ]);
+        }
+        return btoa(binary);
     }
 }
 

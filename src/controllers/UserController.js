@@ -67,6 +67,7 @@ class UserController {
         }
 
         if (allowUpdating) {
+            console.log(111111);
             const [status, user] = await userService.updateUser(req.session.user.id, req.body);
             if (user && req.body.login) {
                 req.session.user = { id: user._id, login: user.login };
