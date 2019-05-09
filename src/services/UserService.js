@@ -109,7 +109,7 @@ class UserService {
         return res;
     }
 
-    async cropUserAvatar(avatar, options = {left: 200, top: 200, width: 150, height: 150}) {
+    async cropUserAvatar(avatar, options = { left: 200, top: 200, width: 150, height: 150 }) {
         console.log(avatar.length);
 
         const croppedAvatar = avatar.replace(/.*;base64,/, '');
