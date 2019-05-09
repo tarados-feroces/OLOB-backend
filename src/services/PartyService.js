@@ -9,14 +9,16 @@ class PartyService {
         this.userToParty = {};
     }
 
-    add(playerID1, playerID2, game) {
+    add(playerID1, playerID2, game, messages = [], steps = []) {
         const partyID = this._countPartyID(playerID1, playerID2);
         console.log(partyID);
 
         this.parties[partyID] = {
             playerID1,
             playerID2,
-            game
+            game,
+            messages,
+            steps
         };
 
         this.userToParty[playerID1] = partyID;
@@ -35,6 +37,11 @@ class PartyService {
         // await gameModel.findOneAndRemove({ partyID: id });
     }
 
+    addMessage(req, message) {
+        const party = this.getCurrentParty(req);
+        party.messages.push(message);
+    }
+
     _countPartyID(playerID1, playerID2) {
         const data = playerID1.toString() + playerID2.toString();
         const shasum = crypto.createHash('sha1');
@@ -50,8 +57,10 @@ class PartyService {
         return this.userToParty[req.session.user.id];
     }
 
-    updatePartyGame(req, game) {
-        this.parties[this.userToParty[req.session.user.id]].game = game;
+    updatePartyGame(req, game, step) {
+        const party = this.getCurrentParty(req);
+        party.game = game;
+        party.steps.push(step);
     }
 
     getUserParty(id) {

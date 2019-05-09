@@ -95,6 +95,7 @@ class GameController {
         await this._sendData({
             data: {
                 fen: data.chess.fen(),
+                steps: data.steps,
                 situation: {
                     type: data.situation ? data.situation : ''
                 },
@@ -120,7 +121,7 @@ class GameController {
 
         const result = gameService.makeStep(game, data.step);
 
-        partyService.updatePartyGame(req, result.chess);
+        partyService.updatePartyGame(req, result.chess, result.step);
 
         await this.sendSnapshot(result, req);
     }
@@ -139,12 +140,15 @@ class GameController {
     }
 
     async chatMessage(data, req) {
+        const newMessage = {
+            text: data.text,
+            author: req.session.user.id
+        };
+        partyService.addMessage(req, newMessage);
+
         await this._sendData({
             cls: gameMessageTypes.CHAT_MESSAGE,
-            data: {
-                text: data.text,
-                author: req.session.user.id
-            }
+            data: newMessage
         }, req);
     }
 

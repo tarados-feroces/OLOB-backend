@@ -13,13 +13,15 @@ class GameService {
     }
 
     makeStep(chess, step) {
+        const from = this._transpileCoordsToStep(step.prevPos);
+        const to = this._transpileCoordsToStep(step.nextPos);
         console.log({
-            from: this._transpileCoordsToStep(step.prevPos),
-            to: this._transpileCoordsToStep(step.nextPos)
+            from,
+            to
         });
         chess.move({
-            from: this._transpileCoordsToStep(step.prevPos),
-            to: this._transpileCoordsToStep(step.nextPos)
+            from,
+            to
         });
 
         let status = false;
@@ -53,7 +55,8 @@ class GameService {
         return {
             chess,
             situation,
-            currentUser: chess.turn()
+            currentUser: chess.turn(),
+            step: { from, to }
         };
     }
 
