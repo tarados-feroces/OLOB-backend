@@ -65,9 +65,6 @@ class UserService {
 
         if (user) {
             for (const prop in data) {
-                if (prop === 'avatar') {
-                    data[prop] = await this.cropUserAvatar(data[prop], data.options);
-                }
                 user[prop] = data[prop];
             }
             await user.save();
@@ -109,11 +106,12 @@ class UserService {
         return res;
     }
 
-    async cropUserAvatar(avatar, options = { left: 200, top: 200, width: 150, height: 150 }) {
-        console.log(avatar.length);
+    async cropUserAvatar(avatar, options) {
+        if (!Object.keys(options).length) {
+            return avatar;
+        }
 
         const croppedAvatar = avatar.replace(/.*;base64,/, '');
-        console.log(croppedAvatar[0]);
         const data = Buffer.from(croppedAvatar, 'base64');
         let newAvatar = await sharp(data)
             .extract(options)

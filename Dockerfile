@@ -29,12 +29,12 @@ RUN apt-get install -y nodejs
 
 #-----------------------------------------------------------------------------------------------------
 
-ADD . /tf_tracker
-WORKDIR /tf_tracker
+ADD . /tf_olob
+WORKDIR /tf_olob
 RUN ./helpers/install.sh
 RUN cat ./supervisor.conf > /etc/supervisor/conf.d/mongo.conf
 RUN service supervisor start && supervisorctl reload && supervisorctl update
-RUN npm run webpack
+RUN npm run build
 RUN chmod +x
 RUN /usr/bin/mongod
 

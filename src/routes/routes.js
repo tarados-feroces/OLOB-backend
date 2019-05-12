@@ -6,6 +6,7 @@ const router = express.Router();
 router.post('/api/user/signup', userController.registerUser);
 router.post('/api/user/login', userController.loginUser);
 router.post('/api/user/update', userController.updateUser);
+router.post('/api/user/update/avatar', userController.updateUserAvatar);
 router.get('/api/user/games', userController.getUserGames);
 router.get('/api/me', userController.getUser);
 router.post('/api/user/signout', userController.signoutUser);

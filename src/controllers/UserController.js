@@ -6,6 +6,12 @@ import partyService from '../services/PartyService';
 import gameService from '../services/GameService';
 
 class UserController {
+    constructor() {
+        this.getCurrentGame = this.getCurrentGame.bind(this);
+        this.loginUser = this.loginUser.bind(this);
+        this.getUser = this.getUser.bind(this);
+    }
+
     async registerUser(req, res) {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         const [status, user] = await userService.signupUser({ ...req.body, avatar: DEFAULT_AVATAR });
@@ -18,6 +24,23 @@ class UserController {
         res.end();
     }
 
+    async getCurrentGame(req) {
+        const party = partyService.getCurrentParty(req);
+        const opponent = party ?
+            await userService.getUser(party.playerID1 === req.session.user.id ? party.playerID2 : party.playerID1) :
+            [];
+
+        return  party ? {
+            fen: party.game.fen(),
+            messages: party.messages,
+            steps: party.steps,
+            opponent: opponent[1],
+            situation: {},
+            currentUser: gameService.getCurrentUser(party.game) === 'b' ? party.playerID2 : party.playerID1,
+            side: party.playerID1 === req.session.user.id ? 0 : 1
+        } : null;
+    }
+
     async loginUser(req, res) {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         const [status, user] = await userService.loginUser(req.body);
@@ -25,8 +48,9 @@ class UserController {
             req.session.user = { id: user._id, login: user.login };
         }
         user.password = undefined;
+        const game = await this.getCurrentGame(req);
         res.status(status);
-        res.send(user);
+        res.send({ user, game });
         res.end();
     }
 
@@ -34,22 +58,7 @@ class UserController {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.session.user) {
             const [status, user] = await userService.getUser(req.session.user.id);
-
-            const party = partyService.getCurrentParty(req);
-            const opponent = party ?
-                await userService.getUser(party.playerID1 === req.session.user.id ? party.playerID2 : party.playerID1) :
-                [];
-
-            const game = party ? {
-                fen: party.game.fen(),
-                messages: party.messages,
-                steps: party.steps,
-                opponent: opponent[1],
-                situation: {},
-                currentUser: gameService.getCurrentUser(party.game) === 'b' ? party.playerID2 : party.playerID1,
-                side: party.playerID1 === req.session.user.id ? 0 : 1
-            } : null;
-
+            const game = await this.getCurrentGame(req);
             res.status(status);
             res.send({ user, game });
             res.end();
@@ -69,7 +78,6 @@ class UserController {
         }
 
         if (allowUpdating) {
-            console.log(111111);
             const [status, user] = await userService.updateUser(req.session.user.id, req.body);
             if (user && req.body.login) {
                 req.session.user = { id: user._id, login: user.login };
@@ -84,6 +92,20 @@ class UserController {
         res.end();
     }
 
+    async updateUserAvatar(req, res) {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+        if (req.session.user) {
+            const avatar = await userService.cropUserAvatar(req.body.avatar, req.body.options);
+            res.status(200);
+            res.send({ avatar });
+            res.end();
+        } else {
+            res.status(409);
+            res.end();
+        }
+    }
+
     async signoutUser(req, res) {
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         if (req.session.user) {
@@ -92,7 +114,7 @@ class UserController {
             res.status(200);
             res.end();
         } else {
-            res.status(404);
+            res.status(409);
             res.end();
         }
     }
@@ -105,7 +127,7 @@ class UserController {
             res.send({ games });
             res.end();
         } else {
-            res.status(404);
+            res.status(409);
             res.end();
         }
     }

@@ -19,11 +19,15 @@ class GameController {
     }
 
     async searchGame(message, req) {
+        const currentPlayer = req.session.user.id;
+        if (this.gameQueue.indexOf(currentPlayer) !== -1) {
+            return;
+        }
         const nextPlayer = this.gameQueue.shift();
         if (!nextPlayer) {
-            this.gameQueue.push(req.session.user.id);
+            this.gameQueue.push(currentPlayer);
         } else {
-            await this.startGame(req.session.user.id, nextPlayer);
+            await this.startGame(currentPlayer, nextPlayer);
         }
     }
 
@@ -95,7 +99,7 @@ class GameController {
         await this._sendData({
             data: {
                 fen: data.chess.fen(),
-                steps: data.steps,
+                step: data.step,
                 situation: {
                     type: data.situation ? data.situation : ''
                 },
@@ -159,13 +163,15 @@ class GameController {
     }
 
     async saveGameData(playerID1, playerID2, winner) {
+        let opponent = await userService.getUser(playerID2);
         await userService.addUserGame(playerID1, {
-            opponent: playerID2,
+            opponent: opponent[1],
             side: Side.WHITE,
             winner
         });
+        opponent = await userService.getUser(playerID1);
         await userService.addUserGame(playerID2, {
-            opponent: playerID1,
+            opponent: opponent[1],
             side: Side.BLACK,
             winner
         });
