@@ -7,6 +7,7 @@ import gameService from '../services/GameService';
 class GameController {
     constructor() {
         this.gameQueue = [];
+        this.changePos = '';
 
         this.messageHandlers = {
             [ gameMessageTypes.SEARCH ]: this.searchGame.bind(this),
@@ -14,7 +15,9 @@ class GameController {
             [ gameMessageTypes.AREAS ]: this.getAvailableMoves.bind(this),
             [ gameMessageTypes.SNAPSHOT ]: this.sendSnapshot.bind(this),
             [ gameMessageTypes.DISCONNECT ]: this.leaveGame.bind(this),
-            [ gameMessageTypes.CHAT_MESSAGE ]: this.chatMessage.bind(this)
+            [ gameMessageTypes.CHAT_MESSAGE ]: this.chatMessage.bind(this),
+            [ gameMessageTypes.DRAW ]: this.requestDraw.bind(this),
+            [ gameMessageTypes.CHANGE_FIGURE ]: this.onFigureChange.bind(this)
         };
     }
 
@@ -125,6 +128,31 @@ class GameController {
 
         const result = gameService.makeStep(game, data.step);
 
+        if (result.situation.type === GameStatus.CHANGE) {
+            this.changePos = result.pos;
+            await userService.sendMessage(req.session.user.id, {
+                data: {},
+                cls: gameMessageTypes.CHANGE_FIGURE
+            });
+            return;
+        }
+
+        partyService.updatePartyGame(req, result.chess, result.step);
+
+        await this.sendSnapshot(result, req);
+    }
+
+    async onFigureChange(data, req) {
+        let party = partyService.getCurrentParty(req);
+        let game = party.game;
+        const result = gameService.changeFigure(game, data.figure, this.changePos);
+        result.step = {
+            from: this.changePos.from,
+            to: this.changePos.to,
+            figure: data.figure.type,
+            side: data.figure.color
+        };
+
         partyService.updatePartyGame(req, result.chess, result.step);
 
         await this.sendSnapshot(result, req);
@@ -163,18 +191,37 @@ class GameController {
     }
 
     async saveGameData(playerID1, playerID2, winner) {
-        let opponent = await userService.getUser(playerID2);
         await userService.addUserGame(playerID1, {
-            opponent: opponent[1],
+            opponent: playerID2,
             side: Side.WHITE,
             winner
         });
-        opponent = await userService.getUser(playerID1);
         await userService.addUserGame(playerID2, {
-            opponent: opponent[1],
+            opponent: playerID1,
             side: Side.BLACK,
             winner
         });
+    }
+
+    async requestDraw(data, req) {
+        switch (data.offer) {
+            case 'Offer':
+                const opponent = partyService.getEnemyOfUser(req.session.user.id);
+                userService.sendMessage(opponent, {
+                    data: {
+                        offer: 'Offer'
+                    },
+                    cls: gameMessageTypes.DRAW
+                });
+                return;
+            case 'Confirm':
+                await this.gameEnded('', req);
+                return;
+            case 'Decline':
+                return;
+            default:
+                return;
+        }
     }
 
     async sendOpponentDisconnect(disconnectedID) {

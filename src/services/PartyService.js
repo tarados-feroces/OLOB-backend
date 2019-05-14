@@ -60,7 +60,7 @@ class PartyService {
     updatePartyGame(req, game, step) {
         const party = this.getCurrentParty(req);
         party.game = game;
-        party.steps.push(step);
+        step && party.steps.push(step);
     }
 
     getUserParty(id) {

@@ -8,12 +8,16 @@ export const gameMessageTypes = {
     AREAS: 'Areas',
     OPPONENT_DISCONNECT: 'Opponent_Disconnect',
     DISCONNECT: 'Disconnect',
-    CHAT_MESSAGE: 'Chat:Message'
+    CHAT_MESSAGE: 'Chat:Message',
+    DRAW: 'Draw',
+    CHANGE_FIGURE: 'Change_Figure'
 };
 
 export const GameStatus = {
     MATE: 'MATE',
-    CHECK: 'CHECK'
+    CHECK: 'CHECK',
+    CHANGE: 'CHANGE',
+    DRAW: 'DRAW'
 };
 
 export const Side = {

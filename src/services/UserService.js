@@ -78,7 +78,13 @@ class UserService {
         const user = await userModel.findOne({ _id });
 
         if (user) {
-            return [200, user.games];
+            const games = await user.games.map(async (item) => {
+                const opponent = await this.getUser(item.opponent);
+                const opponentData = { login: opponent[1].login, avatar: opponent[1].avatar };
+                return { ...item, opponent: opponentData };
+            });
+
+            return [200, games];
         }
 
         return [404, { message: 'User doesn`t exist' }];

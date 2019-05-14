@@ -30,7 +30,7 @@ class UserController {
             await userService.getUser(party.playerID1 === req.session.user.id ? party.playerID2 : party.playerID1) :
             [];
 
-        return  party ? {
+        return party ? {
             fen: party.game.fen(),
             messages: party.messages,
             steps: party.steps,
@@ -49,8 +49,23 @@ class UserController {
         }
         user.password = undefined;
         const game = await this.getCurrentGame(req);
+        const games = [];
+
+        for (let item = 0; item < user.games.length; item++) {
+            const opponent = await userService.getUser(user.games[item].opponent);
+            const opponentData = { login: opponent[1].login, avatar: opponent[1].avatar };
+            console.log(user.games[item]);
+            games.push({ winner: user.games[item].winner, side: user.games[item].side, opponent: opponentData });
+        }
+
+        const newUser = {};
+        newUser.login = user.login;
+        newUser.avatar = user.avatar;
+        newUser.email = user.email;
+        newUser.games = games;
         res.status(status);
-        res.send({ user, game });
+
+        res.send({ user: newUser, game });
         res.end();
     }
 
@@ -59,8 +74,23 @@ class UserController {
         if (req.session.user) {
             const [status, user] = await userService.getUser(req.session.user.id);
             const game = await this.getCurrentGame(req);
+            const games = [];
+
+            for (let item = 0; item < user.games.length; item++) {
+                const opponent = await userService.getUser(user.games[item].opponent);
+                const opponentData = { login: opponent[1].login, avatar: opponent[1].avatar };
+                console.log(user.games[item]);
+                games.push({ winner: user.games[item].winner, side: user.games[item].side, opponent: opponentData });
+            }
+
+            const newUser = {};
+            newUser.login = user.login;
+            newUser.avatar = user.avatar;
+            newUser.email = user.email;
+            newUser.games = games;
             res.status(status);
-            res.send({ user, game });
+
+            res.send({ user: newUser, game });
             res.end();
         } else {
             console.log('no session');

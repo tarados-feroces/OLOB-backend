@@ -6,6 +6,7 @@ const Chess = require('chess.js');
 class GameService {
     init(player1, player2) {
         const chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+        // const chess = new Chess('rn1qkbnr/ppPppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
         chess.header('White', player1);
         chess.header('Black', player2);
 
@@ -13,22 +14,44 @@ class GameService {
     }
 
     makeStep(chess, step) {
-        const from = this._transpileCoordsToStep(step.prevPos);
-        const to = this._transpileCoordsToStep(step.nextPos);
+        let from = step.from;
+        let to = step.to;
+
+        if (!from || !to) {
+            from = this._transpileCoordsToStep(step.prevPos);
+            to = this._transpileCoordsToStep(step.nextPos);
+        }
+
+        const figure = chess.get(from);
+
+        let status = false;
+
+        if ((to[1] === '1' && JSON.stringify(figure) === JSON.stringify({ type: 'p', color: 'b' })) ||
+            (to[1] === '8' && JSON.stringify(figure) === JSON.stringify({ type: 'p', color: 'w' }))) {
+            status = GameStatus.CHANGE;
+        }
+
+        console.log('figure', figure);
+
+        if (status === GameStatus.CHANGE) {
+            return { situation: { type: status }, pos: { from, to } };
+        }
 
         const move = chess.move({
             from,
             to
         });
 
-        let status = false;
-
         if (chess.in_check()) {
             status = GameStatus.CHECK;
         }
 
-        if (chess.game_over()) {
+        if (chess.in_checkmate()) {
             status = GameStatus.MATE;
+        }
+
+        if (chess.in_draw()) {
+            status = GameStatus.DRAW;
         }
 
         const situation = {
@@ -55,9 +78,19 @@ class GameService {
         };
     }
 
+    changeFigure(chess, figure, pos) {
+        console.log(chess.turn());
+        chess.remove(pos.from);
+        chess.put(figure, pos.to);
+        const fen = chess.fen().split(' ');
+        fen[1] = fen[1] === 'w' ? 'b' : 'w';
+        chess.load(fen.join(' '));
+
+        return { chess, currentUser: chess.turn() };
+    }
+
     getAvailableMoves(chess, pos) {
         const steps = chess.moves({ square: this._transpileCoordsToStep(pos), verbose: true });
-        console.log(steps);
         return steps.map((item) => this._transpileStepToCoords(item));
     }
 
