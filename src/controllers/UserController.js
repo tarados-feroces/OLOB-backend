@@ -63,6 +63,7 @@ class UserController {
         newUser.avatar = user.avatar;
         newUser.email = user.email;
         newUser.games = games;
+        newUser.id = user._id;
         res.status(status);
 
         res.send({ user: newUser, game });
@@ -88,6 +89,7 @@ class UserController {
             newUser.avatar = user.avatar;
             newUser.email = user.email;
             newUser.games = games;
+            newUser.id = user._id;
             res.status(status);
 
             res.send({ user: newUser, game });

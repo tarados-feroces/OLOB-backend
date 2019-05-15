@@ -126,20 +126,26 @@ class GameController {
         const party = partyService.getCurrentParty(req);
         const game = party.game;
 
-        const result = gameService.makeStep(game, data.step);
+        try {
+            const result = gameService.makeStep(game, data.step);
 
-        if (result.situation.type === GameStatus.CHANGE) {
-            this.changePos = result.pos;
-            await userService.sendMessage(req.session.user.id, {
-                data: {},
-                cls: gameMessageTypes.CHANGE_FIGURE
-            });
-            return;
+            if (result.situation.type === GameStatus.CHANGE) {
+                this.changePos = result.pos;
+                await userService.sendMessage(req.session.user.id, {
+                    data: {},
+                    cls: gameMessageTypes.CHANGE_FIGURE
+                });
+                return;
+            }
+
+            partyService.updatePartyGame(req, result.chess, result.step);
+
+            await this.sendSnapshot(result, req);
+        }
+        catch (e) {
+            console.log('INVALID STEP: ', data.step);
         }
 
-        partyService.updatePartyGame(req, result.chess, result.step);
-
-        await this.sendSnapshot(result, req);
     }
 
     async onFigureChange(data, req) {
