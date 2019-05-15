@@ -24,6 +24,9 @@ class GameService {
 
         const figure = chess.get(from);
 
+        console.log('from:', from);
+        console.log('to:', to);
+
         let status = false;
 
         if ((to[1] === '1' && JSON.stringify(figure) === JSON.stringify({ type: 'p', color: 'b' })) ||

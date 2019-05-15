@@ -141,11 +141,9 @@ class GameController {
             partyService.updatePartyGame(req, result.chess, result.step);
 
             await this.sendSnapshot(result, req);
-        }
-        catch (e) {
+        } catch (e) {
             console.log('INVALID STEP: ', data.step);
         }
-
     }
 
     async onFigureChange(data, req) {
