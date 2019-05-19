@@ -53,7 +53,7 @@ class UserController {
 
         for (let item = 0; item < user.games.length; item++) {
             const opponent = await userService.getUser(user.games[item].opponent);
-            const opponentData = { login: opponent[1].login, avatar: opponent[1].avatar };
+            const opponentData = { login: opponent[1].login };
             console.log(user.games[item]);
             games.push({ winner: user.games[item].winner, side: user.games[item].side, opponent: opponentData });
         }
@@ -79,7 +79,7 @@ class UserController {
 
             for (let item = 0; item < user.games.length; item++) {
                 const opponent = await userService.getUser(user.games[item].opponent);
-                const opponentData = { login: opponent[1].login, avatar: opponent[1].avatar };
+                const opponentData = { login: opponent[1].login };
                 console.log(user.games[item]);
                 games.push({ winner: user.games[item].winner, side: user.games[item].side, opponent: opponentData });
             }
